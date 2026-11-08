@@ -1,0 +1,33 @@
+name: Build Mac App
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/**'
+      - 'build-mac.sh'
+      - 'MAC-README.txt'
+      - '.github/workflows/build-mac.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Intel and Apple Silicon app
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build, test and package
+        run: bash build-mac.sh
+      - name: Upload finished Mac app
+        uses: actions/upload-artifact@v4
+        with:
+          name: CRN-Typer-Mac-Universal
+          path: dist/CRN-Typer-Mac-Universal.zip
+          if-no-files-found: error
+          retention-days: 30

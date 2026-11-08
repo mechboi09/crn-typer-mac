@@ -14,7 +14,7 @@ app='build/package/CRN Typer.app'
 cp src/Info.plist "$app/Contents/Info.plist"
 xcrun lipo -create build/CRNTyper-arm64 build/CRNTyper-x86_64 \
   -output "$app/Contents/MacOS/CRNTyper"
-xcrun lipo -verify_arch arm64 x86_64 "$app/Contents/MacOS/CRNTyper"
+xcrun lipo "$app/Contents/MacOS/CRNTyper" -verify_arch arm64 x86_64
 plutil -lint "$app/Contents/Info.plist"
 "$app/Contents/MacOS/CRNTyper" --self-test
 codesign --force --sign - "$app"

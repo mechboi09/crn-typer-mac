@@ -27,11 +27,26 @@ Start with **one empty CRN field**. The app finishes at **Add to Summary**; it d
 
 Fast mode can outrun a busy browser. Try the app on a practice form first. There is a small Easter egg when you select Fast.
 
-## Keyboard permission
+## First-time Mac setup
 
-Allow **CRN Typer** in **System Settings → Privacy & Security → Accessibility**, then quit and reopen the app. On macOS 12, use **System Preferences → Security & Privacy → Privacy**.
+### Open the app
 
-The app is locally signed, but is not Apple Developer ID signed or notarized. macOS may require explicit approval before opening it.
+CRN Typer is locally signed but is not Apple Developer ID signed or notarized. macOS may say Apple cannot verify it is free of malicious software. Only proceed if you trust the downloaded file.
+
+1. Move **CRN Typer.app** to **Applications**, then try opening it and dismiss the warning.
+2. Open **System Settings → Privacy & Security**.
+3. Scroll to **Security** and click **Open Anyway** beside CRN Typer.
+4. If prompted, enter your Mac login password on your Mac and confirm **Open**.
+
+**Open Anyway** is available for about an hour after trying to open the app; if it isn't visible, try opening the app again. See [Apple's instructions](https://support.apple.com/en-us/102445).
+
+### Allow keyboard access
+
+1. In **System Settings → Privacy & Security → Accessibility**, enable **CRN Typer**. On macOS 12, use **System Preferences → Security & Privacy → Privacy → Accessibility**.
+2. If the app is missing from the list, open CRN Typer, focus your browser and try an F1–F4 shortcut to trigger the permission prompt; then return to Accessibility settings.
+3. Quit and reopen CRN Typer after granting access.
+
+Accessibility access lets the app send the keyboard input to your browser.
 
 ## Stay in control
 

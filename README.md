@@ -45,3 +45,5 @@ This is an unofficial utility. It cannot inspect the active field or confirm whe
 ## For developers
 
 The source is in [`src/`](src). See [Building the app](docs/BUILDING.md) for local and GitHub build instructions. Builds check both CPU architectures, the typing sequence, and the local app signature. Interactive registration behavior still needs a Mac test.
+
+**Using Windows?** [Get CRN Typer for Windows](https://github.com/mechboi09/crn-typer-windows).

@@ -19,7 +19,7 @@ plutil -lint "$app/Contents/Info.plist"
 "$app/Contents/MacOS/CRNTyper" --self-test
 codesign --force --sign - "$app"
 codesign --verify --strict --verbose=2 "$app"
-cp MAC-README.txt build/package/README.txt
+cp docs/README.txt build/package/README.txt
 ditto -c -k --sequesterRsrc --keepParent build/package dist/CRN-Typer-Mac-Universal.zip
 shasum -a 256 dist/CRN-Typer-Mac-Universal.zip
 printf '\nBuilt universal Mac app (arm64 + x86_64), passed sequence self-tests and verified local signature.\n'

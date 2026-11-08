@@ -1,36 +1,28 @@
-CRN TYPER FOR MAC — FINISHED APP
+CRN TYPER — NORMAL + FAST
 
-This download contains CRN Typer.app, built for both Apple Silicon and Intel.
-Requires macOS 12 or later. No compiler or source files are needed to run it.
+Four CRN lists, six entries each. F1–F4 selects the option to type.
+Choose Normal (300 ms) or Fast (1 ms requested) in the dropdown.
+Selecting Fast reveals the dean's warning joke. It is only a joke.
 
-1. Extract the ZIP and move CRN Typer.app to Applications.
-2. Open CRN Typer.app.
-3. Fill one of the four options with up to six CRNs.
-4. Click the first empty CRN box on the registration page.
-5. Press F1, F2, F3 or F4 (Fn/Globe may be needed on your keyboard).
-6. Release the function key. The app types your CRNs and activates Add to
-   Summary. Review the result. The separate registration Submit is not pressed.
+Start with ONE empty CRN box and focus it before pressing your shortcut.
+Normal: type a CRN, Tab, wait 300 ms for Banner to create the next field.
+Fast: type a CRN, Tab + Enter to activate Add Another CRN, wait 1 ms.
+Both finish with Tab, Tab, Enter to activate Add to Summary.
+Fast uses 1 ms requested pauses; actual timing depends on the OS/browser.
+Fast may skip fields if the browser cannot keep up. Test it on a practice form.
+Neither mode presses the separate registration Submit button.
 
-Always automatic. Fixed 300 ms pauses between CRNs. Starts from ONE empty
-CRN box. Banner must automatically create and focus the next box after Tab.
+Escape cancels; switching applications stops the run. Clear partial text
+before retrying. Keep the same browser window, tab and field focused.
+Blank rows are skipped. CRNs stay in memory only; no network calls.
 
-PERMISSION
+WINDOWS: close previous CRN Typer/REsis apps, then open the EXE.
+The EXE is standalone and uses Windows' built-in .NET Framework.
 
-The app needs Accessibility access to type into your browser. It requests
-this when you first trigger an option from another app. Allow CRN Typer in
-System Settings > Privacy & Security > Accessibility, then quit and reopen it.
-On macOS 12, use System Preferences > Security & Privacy > Privacy instead.
+MAC: move CRN Typer.app to Applications and open it. Grant Accessibility
+access when requested in System Settings > Privacy & Security > Accessibility,
+then restart the app. Fn/Globe may be needed for F1–F4. The app supports
+Intel and Apple Silicon, macOS 12+. It is locally signed, not notarized.
+No developer tools are needed for the finished app.
 
-This app is locally signed during building, not Apple Developer ID signed
-or notarized. macOS may require you to explicitly approve opening it.
-
-Escape cancels. Switching applications stops the run. Switching windows or
-tabs within the same browser is not detected. Keep the same field focused.
-The app does not undo partial typing; clear the form before restarting.
-
-No network calls, credentials, saved CRNs, analytics, or embedded icon.
-The app cannot verify the field or whether registration data was accepted.
-Test on a practice form first. Conflicting F1–F4 shortcuts are reported.
-
-The GitHub build checks both CPU architectures, the typing sequence and app
-signature. These checks do not test an interactive registration page.
+Automated sequence checks do not verify typing into a live registration page.

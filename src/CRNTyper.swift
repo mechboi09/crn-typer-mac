@@ -6,17 +6,19 @@ enum Action: Equatable {
     case text(String), key(CGKeyCode), wait(Int)
 }
 
-func sequence(_ values: [String]) -> [Action]? {
+func sequence(_ values: [String], fast: Bool = false) -> [Action]? {
     guard !values.isEmpty, values.count <= 6,
           Set(values).count == values.count,
           values.allSatisfy({ !$0.isEmpty && $0.count <= 5 && $0.utf8.allSatisfy({ $0 >= 48 && $0 <= 57 }) }) else { return nil }
     var result: [Action] = []
     for (index, value) in values.enumerated() {
         result.append(.text(value))
-        if index < values.count - 1 { result += [.key(48), .wait(300)] }
+        if index < values.count - 1 {
+            result += fast ? [.key(48), .key(36), .wait(1)] : [.key(48), .wait(300)]
+        }
     }
     // Both Tabs are posted in the same main-loop turn, before Banner's 200 ms check.
-    result += [.key(48), .key(48), .wait(80), .key(36)]
+    result += [.key(48), .key(48), .wait(fast ? 1 : 80), .key(36)]
     return result
 }
 
@@ -29,7 +31,8 @@ if CommandLine.arguments.contains("--self-test") {
     precondition(sequence(["hello"]) == nil)
     precondition(sequence(["123456"]) == nil)
     precondition(sequence(["1", "2", "3", "4", "5", "6"]) != nil)
-    print("PASS: CRN sequence, 300 ms pauses, final Tab Tab Enter, leading zeros, and input validation. No keystrokes sent.")
+    precondition(sequence(["90001", "90002"], fast: true) == [.text("90001"), .key(48), .key(36), .wait(1), .text("90002"), .key(48), .key(48), .wait(1), .key(36)])
+    print("PASS: normal and fast modes; CRN sequence, 300 ms pauses, final Tab Tab Enter, leading zeros, and input validation. No keystrokes sent.")
     exit(0)
 }
 
@@ -38,11 +41,13 @@ let hotkeySignature: OSType = 0x43524E54 // CRNT
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var window: NSWindow!
     var fields: [[NSTextField]] = []
-    var status = NSTextField(wrappingLabelWithString: "Ready. Focus the first empty CRN box, then press F1–F4.\nEscape cancels. Automatic · 300 ms.")
+    var status = NSTextField(wrappingLabelWithString: "Ready. Focus the first empty CRN box, then press F1–F4.\nEscape cancels. Choose Normal or Fast.")
     var hotkeys: [EventHotKeyRef] = []
     var escapeKey: EventHotKeyRef?
     var eventHandler: EventHandlerRef?
     let functionKeys: [UInt32] = [122, 120, 99, 118]
+    var speed = NSPopUpButton()
+    var fastMode = false
     var running = false
     var generation = 0
     var target: pid_t = 0
@@ -87,11 +92,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let mainMenu = NSMenu()
         mainMenu.addItem(withTitle: "Quit CRN Typer", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         mainItem.submenu = mainMenu; NSApp.mainMenu = menu
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 448, height: 398), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 448, height: 433), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
         window.title = "CRN Typer"; window.center(); window.delegate = self
         let content = window.contentView!
         for col in 0..<4 {
-            let box = NSBox(frame: NSRect(x: CGFloat(10 + col * 110), y: 162, width: 104, height: 224))
+            let box = NSBox(frame: NSRect(x: CGFloat(10 + col * 110), y: 197, width: 104, height: 224))
             box.title = "Option \(col + 1)"; box.boxType = .primary
             var column: [NSTextField] = []
             for row in 0..<6 {
@@ -106,17 +111,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         for index in 0..<(ordered.count - 1) { ordered[index].nextKeyView = ordered[index + 1] }
         for i in 0..<4 {
             let label = NSTextField(labelWithString: "Press F\(i+1) for option \(i+1)")
-            label.frame = NSRect(x: 16, y: CGFloat(130 - i * 23), width: 410, height: 20); content.addSubview(label)
+            label.frame = NSRect(x: 16, y: CGFloat(165 - i * 23), width: 410, height: 20); content.addSubview(label)
         }
+        speed.frame = NSRect(x: 16, y: 58, width: 416, height: 27)
+        speed.addItems(withTitles: ["Normal (300 ms)", "Fast (1 ms requested)"])
+        speed.target = self; speed.action = #selector(speedChanged(_:)); content.addSubview(speed)
         status.frame = NSRect(x: 16, y: 8, width: 416, height: 47)
         status.font = .systemFont(ofSize: 11); content.addSubview(status)
         window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
     }
 
+    @objc func speedChanged(_ sender: NSPopUpButton) {
+        setStatus(sender.indexOfSelectedItem == 1 ? "fast is guaranteed dean’s warning 😈 (just kidding)" : "Normal mode — automatic, 300 ms.")
+    }
     func setStatus(_ text: String, error: Bool = false) { status.stringValue = text; status.textColor = error ? .systemRed : .labelColor }
     func stop(_ text: String) {
         guard running else { return }
-        running = false; generation += 1
+        running = false; generation += 1; speed.isEnabled = true
         if let ref = escapeKey { UnregisterEventHotKey(ref); escapeKey = nil }
         for field in fields.flatMap({ $0 }) { field.isEnabled = true }
         setStatus(text, error: true)
@@ -144,12 +155,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             _ = AXIsProcessTrustedWithOptions(options); return
         }
         let values = fields[option].map { $0.stringValue.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
-        guard let steps = sequence(values) else { setStatus("Option \(option+1): enter 1–6 unique CRNs, each 1–5 digits.", error: true); return }
+        fastMode = speed.indexOfSelectedItem == 1
+        guard let steps = sequence(values, fast: fastMode) else { setStatus("Option \(option+1): enter 1–6 unique CRNs, each 1–5 digits.", error: true); return }
         guard RegisterEventHotKey(53, 0, EventHotKeyID(signature: hotkeySignature, id: 99), GetApplicationEventTarget(), 0, &escapeKey) == noErr else {
             setStatus("Cannot reserve Escape for cancellation. Close other hotkey apps and retry.", error: true); return
         }
         target = front.processIdentifier; plan = steps; position = 0; count = values.count; typed = 0
-        running = true; generation += 1
+        running = true; generation += 1; speed.isEnabled = false
         for field in fields.flatMap({ $0 }) { field.isEnabled = false }
         setStatus("Option \(option+1) running — Escape cancels.")
         awaitRelease(CGKeyCode(functionKeys[option]), attempts: 0, run: generation)
@@ -160,7 +172,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             guard attempts < 120 else { stop("Stopped: release the function key after pressing it."); return }
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(25)) { self.awaitRelease(key, attempts: attempts + 1, run: run) }
         } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(60)) { self.advance(run) }
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(fastMode ? 1 : 60)) { self.advance(run) }
         }
     }
     func postKey(_ key: CGKeyCode, text: String? = nil) -> Bool {
@@ -192,7 +204,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(milliseconds)) { self.advance(run) }; return
             }
         }
-        running = false
+        running = false; speed.isEnabled = true
         if let ref = escapeKey { UnregisterEventHotKey(ref); escapeKey = nil }
         for field in fields.flatMap({ $0 }) { field.isEnabled = true }
         setStatus("Done — \(count) CRN(s) sent; Add to Summary activated.\nReview the browser's result.")

@@ -2,9 +2,7 @@
 
 A small Mac app that types your CRNs into Banner with a keyboard shortcut.
 
-**[Download the current Mac build](https://github.com/mechboi09/crn-typer-mac/actions/runs/42483791351/artifacts/13618541301)**
-
-This Actions download requires GitHub sign-in. A public release download is being prepared.
+**[Download the current Mac build](https://github.com/mechboi09/crn-typer-mac/raw/refs/heads/main/downloads/CRN-Typer-Mac-Universal.zip)**
 
 macOS 12 or later · Apple Silicon and Intel · No developer tools needed
 

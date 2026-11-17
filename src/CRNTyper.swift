@@ -14,7 +14,7 @@ func sequence(_ values: [String], fast: Bool = false) -> [Action]? {
     for (index, value) in values.enumerated() {
         result.append(.text(value))
         if index < values.count - 1 {
-            result += fast ? [.key(48), .key(36), .wait(1)] : [.key(48), .wait(300)]
+            result += fast ? [.key(48), .key(36), .wait(1)] : [.key(48), .wait(200)]
         }
     }
     // Both Tabs are posted in the same main-loop turn, before Banner's 200 ms check.
@@ -23,7 +23,7 @@ func sequence(_ values: [String], fast: Bool = false) -> [Action]? {
 }
 
 if CommandLine.arguments.contains("--self-test") {
-    let expected: [Action] = [.text("90001"), .key(48), .wait(300), .text("90002"), .key(48), .wait(300), .text("90003"), .key(48), .key(48), .wait(80), .key(36)]
+    let expected: [Action] = [.text("90001"), .key(48), .wait(200), .text("90002"), .key(48), .wait(200), .text("90003"), .key(48), .key(48), .wait(80), .key(36)]
     precondition(sequence(["90001", "90002", "90003"]) == expected)
     precondition(sequence(["00123"]) == [.text("00123"), .key(48), .key(48), .wait(80), .key(36)])
     precondition(sequence([]) == nil)
@@ -32,13 +32,13 @@ if CommandLine.arguments.contains("--self-test") {
     precondition(sequence(["123456"]) == nil)
     precondition(sequence(["1", "2", "3", "4", "5", "6"]) != nil)
     precondition(sequence(["90001", "90002"], fast: true) == [.text("90001"), .key(48), .key(36), .wait(1), .text("90002"), .key(48), .key(48), .wait(1), .key(36)])
-    print("PASS: normal and fast modes; CRN sequence, 300 ms pauses, final Tab Tab Enter, leading zeros, and input validation. No keystrokes sent.")
+    print("PASS: normal and fast modes; CRN sequence, 200 ms pauses, final Tab Tab Enter, leading zeros, and input validation. No keystrokes sent.")
     exit(0)
 }
 
 let hotkeySignature: OSType = 0x43524E54 // CRNT
 
-final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSTextFieldDelegate {
     var window: NSWindow!
     var fields: [[NSTextField]] = []
     var status = NSTextField(wrappingLabelWithString: "Ready. Focus the first empty CRN box, then press F1–F4.\nEscape cancels. Choose Normal or Fast.")
@@ -86,48 +86,91 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
     }
 
+    var tabs = NSTabView()
+    var names: [NSTextField] = []
+    var rowViews: [[NSView]] = []
+    var visibleRows = [3,3,3,3]
+    var editorControls: [NSControl] = []
+    var loading = true
+    var saveWork: DispatchWorkItem?
+    struct Saved: Codable { var values: [[String]]; var names: [String]; var visible: [Int]; var speed: Int }
+    var settingsURL: URL { FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("CRNTyper-AUB/settings.json") }
+    func save() {
+        guard !loading else { return }
+        saveWork?.cancel()
+        do {
+            let saved = Saved(values: fields.map { $0.map { $0.stringValue } }, names: names.map { $0.stringValue }, visible: visibleRows, speed: speed.indexOfSelectedItem)
+            try FileManager.default.createDirectory(at: settingsURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try JSONEncoder().encode(saved).write(to: settingsURL, options: .atomic)
+        } catch { setStatus("Could not save settings: \(error.localizedDescription)", error: true) }
+    }
+    func controlTextDidChange(_ notification: Notification) {
+        for i in 0..<names.count { tabs.tabViewItem(at: i).label = (names[i].stringValue.isEmpty ? "Option \(i+1)" : names[i].stringValue) + " (F\(i+1))" }
+        guard !loading else { return }
+        saveWork?.cancel(); let work = DispatchWorkItem { [weak self] in self?.save() }; saveWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(400), execute: work)
+    }
+    func updateRows(_ option: Int) { for i in 0..<6 { rowViews[option][i].isHidden = i >= visibleRows[option] } }
+    @objc func addCRN(_ sender: NSButton) {
+        guard !running else { return }; let option = sender.tag
+        guard visibleRows[option] < 6 else { setStatus("Maximum six CRNs per option."); return }
+        visibleRows[option] += 1; updateRows(option); save(); window.makeFirstResponder(fields[option][visibleRows[option]-1])
+    }
+    @objc func removeCRN(_ sender: NSButton) {
+        guard !running else { return }; let option = sender.tag / 10, index = sender.tag % 10
+        guard visibleRows[option] > 1 else { return }
+        for i in index..<5 { fields[option][i].stringValue = fields[option][i+1].stringValue }
+        fields[option][5].stringValue = ""; visibleRows[option] -= 1; updateRows(option); save()
+    }
+    @objc func pasteList(_ sender: NSButton) {
+        guard !running else { return }; let option = sender.tag
+        let alert = NSAlert(); alert.messageText = "Paste CRN list"; alert.informativeText = "Up to six unique CRNs, separated by spaces, commas or new lines. This replaces the current option."; alert.addButton(withTitle: "Use this list"); alert.addButton(withTitle: "Cancel")
+        let scroll = NSScrollView(frame: NSRect(x: 0,y: 0,width: 340,height: 140)); scroll.hasVerticalScroller = true
+        let input = NSTextView(frame: scroll.bounds); input.isRichText = false; scroll.documentView = input; alert.accessoryView = scroll
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        let values = input.string.components(separatedBy: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: ","))).filter { !$0.isEmpty }
+        guard values.isEmpty || sequence(values) != nil else { setStatus("Use up to six unique CRNs, 1–5 digits each.", error: true); return }
+        for i in 0..<6 { fields[option][i].stringValue = i < values.count ? values[i] : "" }
+        visibleRows[option] = max(3, values.count); updateRows(option); save(); setStatus("Ready. List saved locally.")
+    }
     func buildUI() {
-        let menu = NSMenu()
-        let mainItem = NSMenuItem(); menu.addItem(mainItem)
-        let mainMenu = NSMenu()
-        mainMenu.addItem(withTitle: "Quit CRN Typer", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
-        mainItem.submenu = mainMenu; NSApp.mainMenu = menu
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 448, height: 433), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
-        window.title = "CRN Typer"; window.center(); window.delegate = self
+        let menu = NSMenu(), item = NSMenuItem(); menu.addItem(item); let appMenu = NSMenu(); appMenu.addItem(withTitle: "Quit CRN Typer", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"); item.submenu = appMenu; NSApp.mainMenu = menu
+        window = NSWindow(contentRect: NSRect(x: 0,y: 0,width: 470,height: 500), styleMask: [.titled,.closable,.miniaturizable], backing: .buffered, defer: false)
+        window.title = "CRN Typer - AUB"; window.center(); window.delegate = self
         let content = window.contentView!
-        for col in 0..<4 {
-            let box = NSBox(frame: NSRect(x: CGFloat(10 + col * 110), y: 197, width: 104, height: 224))
-            box.title = "Option \(col + 1)"; box.boxType = .primary
-            var column: [NSTextField] = []
+        tabs.frame = NSRect(x: 12,y: 125,width: 446,height: 360); content.addSubview(tabs)
+        for option in 0..<4 {
+            let item = NSTabViewItem(identifier: option); item.label = "Option \(option+1) (F\(option+1))"; let page = NSView(frame: NSRect(x: 0,y: 0,width: 420,height: 325)); item.view = page; tabs.addTabViewItem(item)
+            let name = NSTextField(frame: NSRect(x: 16,y: 284,width: 260,height: 26)); name.stringValue = "Option \(option+1)"; name.delegate = self; name.setAccessibilityLabel("Name of option \(option+1)"); page.addSubview(name); names.append(name); editorControls.append(name)
+            let paste = NSButton(title: "Paste list", target: self, action: #selector(pasteList(_:))); paste.tag = option; paste.frame = NSRect(x: 290,y: 282,width: 110,height: 30); page.addSubview(paste); editorControls.append(paste)
+            var column: [NSTextField] = [], rows: [NSView] = []
             for row in 0..<6 {
-                let field = NSTextField(frame: NSRect(x: 8, y: CGFloat(169 - row * 29), width: 80, height: 24))
-                field.font = .systemFont(ofSize: 13)
-                field.setAccessibilityLabel("Option \(col+1), CRN \(row+1)")
-                box.contentView!.addSubview(field); column.append(field)
+                let panel = NSView(frame: NSRect(x: 16,y: CGFloat(244-row*34),width: 390,height: 30)); page.addSubview(panel); rows.append(panel)
+                let label = NSTextField(labelWithString: "CRN \(row+1)"); label.frame = NSRect(x: 0,y: 5,width: 58,height: 20); panel.addSubview(label)
+                let field = NSTextField(frame: NSRect(x: 65,y: 3,width: 225,height: 25)); field.delegate = self; field.setAccessibilityLabel("Option \(option+1), CRN \(row+1)"); panel.addSubview(field); column.append(field)
+                let remove = NSButton(title: "Remove", target: self, action: #selector(removeCRN(_:))); remove.tag = option*10+row; remove.frame = NSRect(x: 300,y: 1,width: 85,height: 28); panel.addSubview(remove); editorControls.append(remove)
             }
-            content.addSubview(box); fields.append(column)
+            fields.append(column); rowViews.append(rows); updateRows(option)
+            let add = NSButton(title: "+ Add CRN", target: self, action: #selector(addCRN(_:))); add.tag = option; add.frame = NSRect(x: 16,y: 18,width: 125,height: 30); page.addSubview(add); editorControls.append(add)
         }
-        let ordered = fields.flatMap { $0 }
-        for index in 0..<(ordered.count - 1) { ordered[index].nextKeyView = ordered[index + 1] }
-        for i in 0..<4 {
-            let label = NSTextField(labelWithString: "Press F\(i+1) for option \(i+1)")
-            label.frame = NSRect(x: 16, y: CGFloat(165 - i * 23), width: 410, height: 20); content.addSubview(label)
+        speed.frame = NSRect(x: 16,y: 84,width: 438,height: 28); speed.addItems(withTitles: ["Normal (200 ms)","Fast (1 ms requested)"]); speed.target = self; speed.action = #selector(speedChanged(_:)); content.addSubview(speed)
+        status.frame = NSRect(x: 16,y: 12,width: 438,height: 62); status.font = .systemFont(ofSize: 12); content.addSubview(status)
+        if FileManager.default.fileExists(atPath: settingsURL.path) {
+            do { let saved = try JSONDecoder().decode(Saved.self, from: Data(contentsOf: settingsURL)); guard saved.values.count == 4 && saved.names.count == 4 && saved.visible.count == 4 else { throw NSError(domain: "Settings",code: 1) }
+                for c in 0..<4 { names[c].stringValue = saved.names[c]; for r in 0..<6 { fields[c][r].stringValue = r < saved.values[c].count ? saved.values[c][r] : "" }; let occupied = (fields[c].lastIndex { !$0.stringValue.isEmpty }).map { $0+1 } ?? 0; visibleRows[c] = max(max(1,min(6,saved.visible[c])),occupied); updateRows(c); tabs.tabViewItem(at: c).label = names[c].stringValue + " (F\(c+1))" }; speed.selectItem(at: max(0,min(1,saved.speed)))
+            } catch { setStatus("Settings could not be loaded: \(error.localizedDescription)", error: true) }
         }
-        speed.frame = NSRect(x: 16, y: 58, width: 416, height: 27)
-        speed.addItems(withTitles: ["Normal (300 ms)", "Fast (1 ms requested)"])
-        speed.target = self; speed.action = #selector(speedChanged(_:)); content.addSubview(speed)
-        status.frame = NSRect(x: 16, y: 8, width: 416, height: 47)
-        status.font = .systemFont(ofSize: 11); content.addSubview(status)
-        window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
+        loading = false; window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
     }
 
     @objc func speedChanged(_ sender: NSPopUpButton) {
-        setStatus(sender.indexOfSelectedItem == 1 ? "fast is guaranteed dean’s warning 😈 (just kidding)" : "Normal mode — automatic, 300 ms.")
+        save()
+        setStatus(sender.indexOfSelectedItem == 1 ? "fast is guaranteed dean’s warning 😈 (just kidding)" : "Normal mode — automatic, 200 ms.")
     }
     func setStatus(_ text: String, error: Bool = false) { status.stringValue = text; status.textColor = error ? .systemRed : .labelColor }
     func stop(_ text: String) {
         guard running else { return }
-        running = false; generation += 1; speed.isEnabled = true
+        running = false; generation += 1; speed.isEnabled = true; editorControls.forEach { .isEnabled = true }
         if let ref = escapeKey { UnregisterEventHotKey(ref); escapeKey = nil }
         for field in fields.flatMap({ $0 }) { field.isEnabled = true }
         setStatus(text, error: true)
@@ -161,7 +204,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             setStatus("Cannot reserve Escape for cancellation. Close other hotkey apps and retry.", error: true); return
         }
         target = front.processIdentifier; plan = steps; position = 0; count = values.count; typed = 0
-        running = true; generation += 1; speed.isEnabled = false
+        running = true; generation += 1; speed.isEnabled = false; editorControls.forEach { .isEnabled = false }
         for field in fields.flatMap({ $0 }) { field.isEnabled = false }
         setStatus("Option \(option+1) running — Escape cancels.")
         awaitRelease(CGKeyCode(functionKeys[option]), attempts: 0, run: generation)
@@ -204,13 +247,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(milliseconds)) { self.advance(run) }; return
             }
         }
-        running = false; speed.isEnabled = true
+        running = false; speed.isEnabled = true; editorControls.forEach { .isEnabled = true }
         if let ref = escapeKey { UnregisterEventHotKey(ref); escapeKey = nil }
         for field in fields.flatMap({ $0 }) { field.isEnabled = true }
-        setStatus("Done — \(count) CRN(s) sent; Add to Summary activated.\nReview the browser's result.")
+        setStatus("Done — \(count) CRN(s) sent; Keys sent to Add to Summary.\nReview the browser's result.")
     }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
     func applicationWillTerminate(_ notification: Notification) {
+        save()
         running = false; generation += 1
         for ref in hotkeys { UnregisterEventHotKey(ref) }
         if let ref = escapeKey { UnregisterEventHotKey(ref) }

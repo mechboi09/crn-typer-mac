@@ -16,7 +16,7 @@ permissions:
 jobs:
   build:
     name: Build Intel and Apple Silicon app
-    runs-on: macos-15
+    runs-on: macos-15-intel
     timeout-minutes: 15
     steps:
       - name: Check out source
@@ -28,7 +28,7 @@ jobs:
       - name: Upload finished Mac app
         uses: actions/upload-artifact@v4
         with:
-          name: CRN-Typer-Mac-Universal
-          path: dist/CRN-Typer-Mac-Universal.zip
+          name: CRN-typer-Mac
+          path: 'dist/CRN typer.zip'
           if-no-files-found: error
           retention-days: 30

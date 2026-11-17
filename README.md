@@ -1,35 +1,38 @@
-# CRN Typer for AUB — Mac
+# CRN typer for Mac
 
-[Download previous Mac build](https://github.com/mechboi09/crn-typer-mac/raw/refs/heads/main/downloads/CRN-Typer-Mac-Universal.zip)
+**Updated app build in progress.** The previous download did not include the final seven-box editor. This page will link the new app after its universal build and signature checks pass.
 
-**Compact update is in source; the new Mac build is pending.** The ZIP above is the previous build until the GitHub Mac runner finishes. [Build status](https://github.com/mechboi09/crn-typer-mac/actions)
+The finished download contains only **CRN typer.app** in a ZIP; all instructions are here. macOS apps are bundles, so a ZIP is needed to distribute the app correctly. An EXE is Windows-only.
 
-Four compact columns labelled **Option 1 (F1)** through **Option 4 (F4)**. Paste a CRN list directly into any box to fill that box and the boxes below it. Spaces, commas, tabs and newlines are accepted. **Clear all** empties all four options.
+## Use
 
-**No autosave:** closing the app discards the CRNs. No settings files are created, read or written. Older settings files are ignored.
+1. Download and extract **CRN typer.zip**, move **CRN typer.app** to Applications, then open it.
+2. Enter up to **seven CRNs per option**. F1–F4 select the four columns; some keyboards need **Fn/Globe + F1–F4**.
+3. Focus the first empty CRN box in your browser, then press the corresponding shortcut and release it.
+4. Review Summary. The app ends at **Add to Summary**, with a final Tab, Tab, Enter; the separate Submit button remains manual.
 
-Six CRNs per option. Normal requests **200 ms**; Fast requests 1 ms. Click the first browser CRN field, then F1–F4 (Fn/Globe may be needed). Both end at Add to Summary using Tab Tab Enter. Submit remains manual. Escape cancels; changing apps stops a run. Browser tab changes are not detected. Test on a practice form; live behavior remains unverified.
+## Editing and speed
+
+- Compact four-column layout, digits only, with leading zeros preserved.
+- Paste a list into a box to distribute it downward in that option. Commas and whitespace separate CRNs. Invalid or duplicate pasted lists are rejected.
+- **Command+A** (or **Control+A**) once selects the current CRN; twice within 0.7 seconds selects that column's numbers.
+- Copy/Cut/Paste and Delete/Backspace apply to the selected column. Clearing returns to its first box.
+- No autosave or settings files. Closing the app discards the CRNs.
+- The black **Normal/Fast toggle** starts in Fast. Normal requests **200 ms** between entries; Fast requests **1 ms** and activates Add Another CRN using Tab + Enter. Actual timing varies. **Tips** opens the notes.
 
 ## First-time Mac setup
 
-### Open the app
+The app is locally signed, but is not Apple Developer ID signed or notarized. macOS may say Apple cannot verify it is free of malicious software. Proceed only if you trust your downloaded file.
 
-CRN Typer is locally signed but is not Apple Developer ID signed or notarized. macOS may say Apple cannot verify it is free of malicious software. Only proceed if you trust the downloaded file.
+1. Move the app to Applications and try opening it once.
+2. Open **System Settings → Privacy & Security**, find the blocked-app notice under Security, and choose **Open Anyway**.
+3. Confirm Open and enter your Mac login password on the Mac if prompted. [Apple's instructions](https://support.apple.com/en-us/102445)
+4. In **Privacy & Security → Accessibility**, enable **CRN typer**. Add it using **+** if needed, then quit and reopen the app. On macOS 12 use System Preferences → Security & Privacy → Privacy → Accessibility.
 
-1. Move **CRN Typer.app** to **Applications**, then try opening it and dismiss the warning.
-2. Open **System Settings → Privacy & Security**.
-3. Scroll to **Security** and click **Open Anyway** beside CRN Typer.
-4. If prompted, enter your Mac login password on your Mac and confirm **Open**.
+Close older typer apps before running this one. Escape cancels; switching applications stops a run. Changes of browser tab or field are not detected. The app cannot verify page results. Test on a practice form first; interactive iPad/Mac or live registration behavior has not been verified by the build checks.
 
-**Open Anyway** is available for about an hour after trying to open the app; if it isn't visible, try opening the app again. See [Apple's instructions](https://support.apple.com/en-us/102445).
+## Building
 
-### Allow keyboard access
+The [build script](build-mac.sh) compiles **Intel and Apple Silicon**, runs non-typing sequence checks, verifies both architectures and a local signature, then packages the app without a README. The workflow uses the standard Intel Mac runner to avoid the Apple Silicon capacity failure encountered by earlier builds. Repository permissions remain read-only.
 
-1. In **System Settings → Privacy & Security → Accessibility**, enable **CRN Typer**. On macOS 12, use **System Preferences → Security & Privacy → Privacy → Accessibility**.
-2. If the app is missing from the list, open CRN Typer, focus your browser and try an F1–F4 shortcut to trigger the permission prompt; then return to Accessibility settings.
-3. Quit and reopen CRN Typer after granting access.
-
-Accessibility access lets the app send the keyboard input to your browser.
-
-
-[Windows version](https://github.com/mechboi09/crn-typer-windows)
+[Windows direct EXE](https://github.com/mechboi09/crn-typer-windows/raw/refs/heads/main/download/CRN%20typer.exe)

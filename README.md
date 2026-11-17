@@ -1,38 +1,42 @@
 # CRN typer for Mac
 
-**Mac update not yet available:** GitHub could not assign a Mac runner to build the latest source. The new download will be linked once the app is built.
+**New Mac download pending:** GitHub could not assign a Mac runner to build the latest version.
 
-The finished download contains only **CRN typer.app** in a ZIP; all instructions are here. macOS apps are bundles, so a ZIP is needed to distribute the app correctly. An EXE is Windows-only.
+## How to use
 
-## Use
+1. Extract **CRN typer.zip**, move **CRN typer.app** to Applications, then open it.
+2. Enter up to **seven CRNs** in each option.
+3. Click the first empty CRN box in your browser.
+4. Press **F1–F4** for the matching option. Some keyboards need **Fn/Globe + F1–F4**.
+5. Review Summary, then press **Submit** yourself.
 
-1. Download and extract **CRN typer.zip**, move **CRN typer.app** to Applications, then open it.
-2. Enter up to **seven CRNs per option**. F1–F4 select the four columns; some keyboards need **Fn/Globe + F1–F4**.
-3. Focus the first empty CRN box in your browser, then press the corresponding shortcut and release it.
-4. Review Summary. The app ends at **Add to Summary**, with a final Tab, Tab, Enter; the separate Submit button remains manual.
+## First-time setup
 
-## Editing and speed
+If macOS says Apple cannot verify the app:
 
-- Compact four-column layout, digits only, with leading zeros preserved.
-- Paste a list into a box to distribute it downward in that option. Commas and whitespace separate CRNs. Invalid or duplicate pasted lists are rejected.
-- **Command+A** (or **Control+A**) once selects the current CRN; twice within 0.7 seconds selects that column's numbers.
-- Copy/Cut/Paste and Delete/Backspace apply to the selected column. Clearing returns to its first box.
-- No autosave or settings files. Closing the app discards the CRNs.
-- The black **Normal/Fast toggle** starts in Fast. Normal uses **200 ms** between entries; Fast uses **1 ms** and activates Add Another CRN using Tab + Enter. Actual timing varies. **Tips** opens the notes.
+1. Try opening it once.
+2. Go to **System Settings → Privacy & Security** and click **Open Anyway** under Security.
+3. Confirm Open and enter your Mac login password if prompted.
 
-## First-time Mac setup
+Then enable **CRN typer** under **Privacy & Security → Accessibility** and restart the app. Add it using **+** if it isn't listed. On macOS 12, use **System Preferences → Security & Privacy → Privacy → Accessibility**.
 
-The app is locally signed, but is not Apple Developer ID signed or notarized. macOS may say Apple cannot verify it is free of malicious software. Proceed only if you trust your downloaded file.
+Only open a downloaded app you trust. [Apple's instructions](https://support.apple.com/en-us/102445)
 
-1. Move the app to Applications and try opening it once.
-2. Open **System Settings → Privacy & Security**, find the blocked-app notice under Security, and choose **Open Anyway**.
-3. Confirm Open and enter your Mac login password on the Mac if prompted. [Apple's instructions](https://support.apple.com/en-us/102445)
-4. In **Privacy & Security → Accessibility**, enable **CRN typer**. Add it using **+** if needed, then quit and reopen the app. On macOS 12 use System Preferences → Security & Privacy → Privacy → Accessibility.
+## Editing
 
-Close older typer apps before running this one. Escape cancels; switching applications stops a run. Changes of browser tab or field are not detected. The app cannot verify page results. 
+- Paste a list into a box to fill it and those below it. Separate CRNs with spaces, commas or new lines.
+- Press **Command+A** or **Control+A** once to select one CRN, or **twice quickly** to select the column.
+- Copy, Cut, Paste and Delete work on the selected column. Clearing returns to its first box.
+- **Closing the app clears your CRNs.**
 
-## Building
+## Modes
 
-The [build script](build-mac.sh) compiles **Intel and Apple Silicon**, runs non-typing sequence checks, verifies both architectures and a local signature, then packages the app without a README. The workflow uses the standard Intel Mac runner to avoid the Apple Silicon capacity failure encountered by earlier builds. Repository permissions remain read-only.
+**Fast is the default.** Use the switch to change modes, or open **Tips** for the notes.
 
-[Windows direct EXE](https://github.com/mechboi09/crn-typer-windows/raw/refs/heads/main/download/CRN%20typer.exe)
+| Normal | Fast |
+| --- | --- |
+| 200 ms | 1 ms |
+
+Close older typer apps before using the shortcuts. **Escape** cancels; switching applications also stops a run. Keep the correct browser tab and field focused, and review the result in Summary.
+
+[Windows version](https://github.com/mechboi09/crn-typer-windows) · [Developer notes](docs/BUILDING.md)

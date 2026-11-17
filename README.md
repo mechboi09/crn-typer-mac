@@ -1,10 +1,10 @@
-# CRN typer for Mac
+# CRN Typer - AUB
 
 **New Mac download pending:** GitHub could not assign a Mac runner to build the latest version.
 
 ## How to use
 
-1. Extract **CRN typer.zip**, move **CRN typer.app** to Applications, then open it.
+1. Extract **CRN Typer - AUB.zip**, move **CRN Typer - AUB.app** to Applications, then open it.
 2. Enter up to **seven CRNs** in each option.
 3. Click the first empty CRN box in your browser.
 4. Press **F1–F4** for the matching option. Some keyboards need **Fn/Globe + F1–F4**.
@@ -18,7 +18,7 @@ If macOS says Apple cannot verify the app:
 2. Go to **System Settings → Privacy & Security** and click **Open Anyway** under Security.
 3. Confirm Open and enter your Mac login password if prompted.
 
-Then enable **CRN typer** under **Privacy & Security → Accessibility** and restart the app. Add it using **+** if it isn't listed. On macOS 12, use **System Preferences → Security & Privacy → Privacy → Accessibility**.
+Then enable **CRN Typer - AUB** under **Privacy & Security → Accessibility** and restart the app. Add it using **+** if it isn't listed. On macOS 12, use **System Preferences → Security & Privacy → Privacy → Accessibility**.
 
 Only open a downloaded app you trust. [Apple's instructions](https://support.apple.com/en-us/102445)
 

@@ -29,6 +29,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CRN-typer-Mac
-          path: 'dist/CRN typer.zip'
+          path: 'dist/CRN Typer - AUB.zip'
           if-no-files-found: error
           retention-days: 30

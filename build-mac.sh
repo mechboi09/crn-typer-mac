@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 export MACOSX_DEPLOYMENT_TARGET=12.0
-app='build/CRN typer.app'
+app='build/CRN Typer - AUB.app'
 mkdir -p "$app/Contents/MacOS" dist
 sdk="$(xcrun --sdk macosx --show-sdk-path)"
 for architecture in arm64 x86_64; do
@@ -18,5 +18,5 @@ plutil -lint "$app/Contents/Info.plist"
 codesign --force --sign - "$app"
 codesign --verify --strict --verbose=2 "$app"
 # Only the application is distributed; instructions live in the repository README.
-ditto -c -k --sequesterRsrc --keepParent "$app" 'dist/CRN typer.zip'
-shasum -a 256 'dist/CRN typer.zip'
+ditto -c -k --sequesterRsrc --keepParent "$app" 'dist/CRN Typer - AUB.zip'
+shasum -a 256 'dist/CRN Typer - AUB.zip'

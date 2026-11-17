@@ -176,10 +176,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSTe
         let alert = NSAlert(); alert.messageText = "Tips"; alert.informativeText = "- Use Normal mode (200 ms) to enter all your CRNs in one option, especially when the courses aren’t in high demand.\n- For high-demand courses, use Fast mode (1ms) and organize your CRNs across two or three options, placing your highest priority courses in Option 1."; alert.addButton(withTitle: "OK"); alert.runModal()
     }
     func buildUI() {
-        let menu = NSMenu(), item = NSMenuItem(); menu.addItem(item); let appMenu = NSMenu(); appMenu.addItem(withTitle: "Quit CRN typer", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"); item.submenu = appMenu; NSApp.mainMenu = menu
+        let menu = NSMenu(), item = NSMenuItem(); menu.addItem(item); let appMenu = NSMenu(); appMenu.addItem(withTitle: "Quit CRN Typer - AUB", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"); item.submenu = appMenu; NSApp.mainMenu = menu
         let editItem = NSMenuItem(); menu.addItem(editItem); let edit = NSMenu(title: "Edit"); editItem.submenu = edit
         edit.addItem(withTitle: "Copy",action: #selector(NSText.copy(_:)),keyEquivalent: "c"); edit.addItem(withTitle: "Cut",action: #selector(NSText.cut(_:)),keyEquivalent: "x"); edit.addItem(withTitle: "Paste",action: #selector(NSText.paste(_:)),keyEquivalent: "v"); edit.addItem(withTitle: "Select All",action: #selector(NSText.selectAll(_:)),keyEquivalent: "a")
-        window = NSWindow(contentRect: NSRect(x: 0,y: 0,width: 306,height: 294),styleMask: [.titled,.closable,.miniaturizable],backing: .buffered,defer: false); window.title = "CRN typer"; window.center(); window.delegate = self
+        window = NSWindow(contentRect: NSRect(x: 0,y: 0,width: 306,height: 294),styleMask: [.titled,.closable,.miniaturizable],backing: .buffered,defer: false); window.title = "CRN Typer - AUB"; window.center(); window.delegate = self
         let content = window.contentView!
         for option in 0..<4 {
             let group = NSBox(frame: NSRect(x: CGFloat(6+option*75),y: 87,width: 73,height: 201)); group.title = "Option \(option+1)"; group.titleFont = .systemFont(ofSize: 11); content.addSubview(group)

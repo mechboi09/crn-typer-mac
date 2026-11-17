@@ -2,6 +2,11 @@ import Cocoa
 import Carbon
 import ApplicationServices
 
+final class CrnField: NSTextField { var pasteValues: ((String) -> Void)? }
+final class CrnEditor: NSTextView {
+    var pasteValues: ((String) -> Void)?
+    override func paste(_ sender: Any?) { pasteValues?(NSPasteboard.general.string(forType: .string) ?? "") }
+}
 enum Action: Equatable {
     case text(String), key(CGKeyCode), wait(Int)
 }
@@ -86,41 +91,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSTe
         }
     }
 
+    let crnEditor = CrnEditor(frame: .zero)
+    func windowWillReturnFieldEditor(_ sender: NSWindow, to client: Any?) -> Any? {
+        guard let field = client as? CrnField else { return nil }
+        crnEditor.isFieldEditor = true; crnEditor.pasteValues = field.pasteValues; return crnEditor
+    }
+    @objc func clearAll(_ sender: NSButton) { guard !running else { return }; window.makeFirstResponder(nil); for column in fields { for field in column { field.stringValue = "" } };  }
+    func directPaste(_ text: String, option: Int, index: Int) {
+        guard !running else { return }
+        let values = text.components(separatedBy: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: ","))).filter { !$0.isEmpty }
+        guard values.count <= 6-index && (values.isEmpty || sequence(values) != nil) else { setStatus("Paste up to \(6-index) unique CRNs, 1–5 digits each.", error: true); return }
+        window.makeFirstResponder(nil)
+        for i in index..<6 { fields[option][i].stringValue = i-index < values.count ? values[i-index] : "" }; 
+    }
     var tabs = NSTabView()
     var names: [NSTextField] = []
     var rowViews: [[NSView]] = []
     var visibleRows = [3,3,3,3]
     var editorControls: [NSControl] = []
     var loading = true
-    var saveWork: DispatchWorkItem?
-    struct Saved: Codable { var values: [[String]]; var names: [String]; var visible: [Int]; var speed: Int }
-    var settingsURL: URL { FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("CRNTyper-AUB/settings.json") }
-    func save() {
-        guard !loading else { return }
-        saveWork?.cancel()
-        do {
-            let saved = Saved(values: fields.map { $0.map { $0.stringValue } }, names: names.map { $0.stringValue }, visible: visibleRows, speed: speed.indexOfSelectedItem)
-            try FileManager.default.createDirectory(at: settingsURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-            try JSONEncoder().encode(saved).write(to: settingsURL, options: .atomic)
-        } catch { setStatus("Could not save settings: \(error.localizedDescription)", error: true) }
-    }
-    func controlTextDidChange(_ notification: Notification) {
-        for i in 0..<names.count { tabs.tabViewItem(at: i).label = (names[i].stringValue.isEmpty ? "Option \(i+1)" : names[i].stringValue) + " (F\(i+1))" }
-        guard !loading else { return }
-        saveWork?.cancel(); let work = DispatchWorkItem { [weak self] in self?.save() }; saveWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(400), execute: work)
-    }
+
+
+
+
     func updateRows(_ option: Int) { for i in 0..<6 { rowViews[option][i].isHidden = i >= visibleRows[option] } }
     @objc func addCRN(_ sender: NSButton) {
         guard !running else { return }; let option = sender.tag
         guard visibleRows[option] < 6 else { setStatus("Maximum six CRNs per option."); return }
-        visibleRows[option] += 1; updateRows(option); save(); window.makeFirstResponder(fields[option][visibleRows[option]-1])
+        visibleRows[option] += 1; updateRows(option);  window.makeFirstResponder(fields[option][visibleRows[option]-1])
     }
     @objc func removeCRN(_ sender: NSButton) {
         guard !running else { return }; let option = sender.tag / 10, index = sender.tag % 10
         guard visibleRows[option] > 1 else { return }
         for i in index..<5 { fields[option][i].stringValue = fields[option][i+1].stringValue }
-        fields[option][5].stringValue = ""; visibleRows[option] -= 1; updateRows(option); save()
+        fields[option][5].stringValue = ""; visibleRows[option] -= 1; updateRows(option); 
     }
     @objc func pasteList(_ sender: NSButton) {
         guard !running else { return }; let option = sender.tag
@@ -131,40 +135,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSTe
         let values = input.string.components(separatedBy: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: ","))).filter { !$0.isEmpty }
         guard values.isEmpty || sequence(values) != nil else { setStatus("Use up to six unique CRNs, 1–5 digits each.", error: true); return }
         for i in 0..<6 { fields[option][i].stringValue = i < values.count ? values[i] : "" }
-        visibleRows[option] = max(3, values.count); updateRows(option); save(); setStatus("Ready. List saved locally.")
+        visibleRows[option] = max(3, values.count); updateRows(option);  setStatus("Ready. List loaded.")
     }
     func buildUI() {
         let menu = NSMenu(), item = NSMenuItem(); menu.addItem(item); let appMenu = NSMenu(); appMenu.addItem(withTitle: "Quit CRN Typer", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"); item.submenu = appMenu; NSApp.mainMenu = menu
-        window = NSWindow(contentRect: NSRect(x: 0,y: 0,width: 470,height: 500), styleMask: [.titled,.closable,.miniaturizable], backing: .buffered, defer: false)
-        window.title = "CRN Typer - AUB"; window.center(); window.delegate = self
+        window = NSWindow(contentRect: NSRect(x: 0,y: 0,width: 420,height: 320), styleMask: [.titled,.closable,.miniaturizable], backing: .buffered, defer: false); window.title = "CRN Typer - AUB"; window.center(); window.delegate = self
         let content = window.contentView!
-        tabs.frame = NSRect(x: 12,y: 125,width: 446,height: 360); content.addSubview(tabs)
         for option in 0..<4 {
-            let item = NSTabViewItem(identifier: option); item.label = "Option \(option+1) (F\(option+1))"; let page = NSView(frame: NSRect(x: 0,y: 0,width: 420,height: 325)); item.view = page; tabs.addTabViewItem(item)
-            let name = NSTextField(frame: NSRect(x: 16,y: 284,width: 260,height: 26)); name.stringValue = "Option \(option+1)"; name.delegate = self; name.setAccessibilityLabel("Name of option \(option+1)"); page.addSubview(name); names.append(name); editorControls.append(name)
-            let paste = NSButton(title: "Paste list", target: self, action: #selector(pasteList(_:))); paste.tag = option; paste.frame = NSRect(x: 290,y: 282,width: 110,height: 30); page.addSubview(paste); editorControls.append(paste)
+            let box = NSBox(frame: NSRect(x: CGFloat(7+option*103),y: 125,width: 100,height: 190)); box.title = "Option \(option+1) (F\(option+1))"; content.addSubview(box)
+            let name = NSTextField(); name.stringValue = "Option \(option+1)"; names.append(name)
             var column: [NSTextField] = [], rows: [NSView] = []
             for row in 0..<6 {
-                let panel = NSView(frame: NSRect(x: 16,y: CGFloat(244-row*34),width: 390,height: 30)); page.addSubview(panel); rows.append(panel)
-                let label = NSTextField(labelWithString: "CRN \(row+1)"); label.frame = NSRect(x: 0,y: 5,width: 58,height: 20); panel.addSubview(label)
-                let field = NSTextField(frame: NSRect(x: 65,y: 3,width: 225,height: 25)); field.delegate = self; field.setAccessibilityLabel("Option \(option+1), CRN \(row+1)"); panel.addSubview(field); column.append(field)
-                let remove = NSButton(title: "Remove", target: self, action: #selector(removeCRN(_:))); remove.tag = option*10+row; remove.frame = NSRect(x: 300,y: 1,width: 85,height: 28); panel.addSubview(remove); editorControls.append(remove)
+                let field = CrnField(frame: NSRect(x: 5,y: CGFloat(137-row*24),width: 86,height: 23)); field.delegate = self; field.setAccessibilityLabel("Option \(option+1), CRN \(row+1)")
+                field.pasteValues = { [weak self] text in self?.directPaste(text,option: option,index: row) }; box.contentView!.addSubview(field); column.append(field); rows.append(field)
             }
-            fields.append(column); rowViews.append(rows); updateRows(option)
-            let add = NSButton(title: "+ Add CRN", target: self, action: #selector(addCRN(_:))); add.tag = option; add.frame = NSRect(x: 16,y: 18,width: 125,height: 30); page.addSubview(add); editorControls.append(add)
+            fields.append(column); rowViews.append(rows)
         }
-        speed.frame = NSRect(x: 16,y: 84,width: 438,height: 28); speed.addItems(withTitles: ["Normal (200 ms)","Fast (1 ms requested)"]); speed.target = self; speed.action = #selector(speedChanged(_:)); content.addSubview(speed)
-        status.frame = NSRect(x: 16,y: 12,width: 438,height: 62); status.font = .systemFont(ofSize: 12); content.addSubview(status)
-        if FileManager.default.fileExists(atPath: settingsURL.path) {
-            do { let saved = try JSONDecoder().decode(Saved.self, from: Data(contentsOf: settingsURL)); guard saved.values.count == 4 && saved.names.count == 4 && saved.visible.count == 4 else { throw NSError(domain: "Settings",code: 1) }
-                for c in 0..<4 { names[c].stringValue = saved.names[c]; for r in 0..<6 { fields[c][r].stringValue = r < saved.values[c].count ? saved.values[c][r] : "" }; let occupied = (fields[c].lastIndex { !$0.stringValue.isEmpty }).map { $0+1 } ?? 0; visibleRows[c] = max(max(1,min(6,saved.visible[c])),occupied); updateRows(c); tabs.tabViewItem(at: c).label = names[c].stringValue + " (F\(c+1))" }; speed.selectItem(at: max(0,min(1,saved.speed)))
-            } catch { setStatus("Settings could not be loaded: \(error.localizedDescription)", error: true) }
-        }
+        speed.frame = NSRect(x: 8,y: 87,width: 404,height: 27); speed.addItems(withTitles: ["Normal (200 ms)","Fast (1 ms requested)"]); speed.target = self; speed.action = #selector(speedChanged(_:)); content.addSubview(speed)
+        status.frame = NSRect(x: 10,y: 43,width: 400,height: 40); status.font = .systemFont(ofSize: 11); status.stringValue = "Ready. Focus the first CRN box, then F1–F4. Escape cancels."; content.addSubview(status)
+        let clear = NSButton(title: "Clear all",target: self,action: #selector(clearAll(_:))); clear.frame = NSRect(x: 8,y: 7,width: 404,height: 28); content.addSubview(clear); editorControls.append(clear)
+        for c in 0..<4 { visibleRows[c] = 6; updateRows(c) }
         loading = false; window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
     }
-
     @objc func speedChanged(_ sender: NSPopUpButton) {
-        save()
+
         setStatus(sender.indexOfSelectedItem == 1 ? "fast is guaranteed dean’s warning 😈 (just kidding)" : "Normal mode — automatic, 200 ms.")
     }
     func setStatus(_ text: String, error: Bool = false) { status.stringValue = text; status.textColor = error ? .systemRed : .labelColor }
@@ -254,7 +248,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSTe
     }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
     func applicationWillTerminate(_ notification: Notification) {
-        save()
+
         running = false; generation += 1
         for ref in hotkeys { UnregisterEventHotKey(ref) }
         if let ref = escapeKey { UnregisterEventHotKey(ref) }

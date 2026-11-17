@@ -1,14 +1,13 @@
- Version 2: saved options and a cleaner editor
+CRN TYPER - COMPACT EDITION
 
-- Four named tabs with the same F1–F4 shortcuts.
-- Three CRN rows to start; + Add CRN and Remove adjust the list.
-- Paste list accepts spaces, commas, tabs or newlines and checks duplicates and invalid CRNs before replacing the option.
-- CRNs, option names, visible rows and speed save locally after a short pause in editing and on quit. They restore when you reopen the app.
-- Settings are written atomically; no account, server or GitHub synchronization is used.
-- Normal now requests 200 ms. Fast retains 1 ms requested pauses; actual timing depends on the computer and browser.
-- Status reports keys sent; it cannot confirm course acceptance.
+Four columns labelled Option 1 (F1) through Option 4 (F4).
+Paste a list directly into a CRN box: spaces, commas, tabs and newlines are supported.
+The list fills that box and the boxes below it in the same option, clearing the remaining boxes below. Leading zeros are retained.
+Clear all empties every option. CRNs stay in memory only; closing the app discards them.
+No settings files are created, read or written. Older settings files are ignored.
 
-
-Mac settings: ~/Library/Application Support/CRNTyper-AUB/settings.json
-
-First launch: Privacy & Security > Open Anyway, then allow CRN Typer in Accessibility. Close other typers before using F1-F4. The app sends keys only and does not verify page results.
+AUB: six CRNs per option; Normal 200ms or Fast 1ms requested. Ends at Add to Summary (Tab Tab Enter).
+LAU: ten CRNs per option; always Instant, no speed selector or status captions. Ends with Enter only and may submit immediately.
+Close other typer versions to free the F1-F4 shortcuts. Click the first empty browser CRN field before pressing the shortcut.
+Escape cancels except events already queued in Instant mode. The app cannot inspect the field or verify registration results.
+Test using an offline practice form. No live registration tests have been performed.

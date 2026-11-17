@@ -1,41 +1,14 @@
-# CRN Typer for Mac
+# CRN Typer for AUB — Mac
 
-A small Mac app that types your CRNs into Banner with a keyboard shortcut.
+[Download previous Mac build](https://github.com/mechboi09/crn-typer-mac/raw/refs/heads/main/downloads/CRN-Typer-Mac-Universal.zip)
 
-**[Download the previous Mac build](https://github.com/mechboi09/crn-typer-mac/raw/refs/heads/main/downloads/CRN-Typer-Mac-Universal.zip)**
+**Compact update is in source; the new Mac build is pending.** The ZIP above is the previous build until the GitHub Mac runner finishes. [Build status](https://github.com/mechboi09/crn-typer-mac/actions)
 
-**Version 2 build pending:** the tabbed editor, autosave, paste lists and 200 ms Normal mode are in the source. [The Mac build is queued](https://github.com/mechboi09/crn-typer-mac/actions/runs/44060103245); the public ZIP above is still the previous version.
+Four compact columns labelled **Option 1 (F1)** through **Option 4 (F4)**. Paste a CRN list directly into any box to fill that box and the boxes below it. Spaces, commas, tabs and newlines are accepted. **Clear all** empties all four options.
 
-macOS 12 or later · Apple Silicon and Intel · No developer tools needed
+**No autosave:** closing the app discards the CRNs. No settings files are created, read or written. Older settings files are ignored.
 
-## Version 2: saved options and a cleaner editor
-
-- Four named tabs with the same F1–F4 shortcuts.
-- Three CRN rows to start; **+ Add CRN** and **Remove** adjust the list.
-- **Paste list** accepts spaces, commas, tabs or newlines and checks duplicates and invalid CRNs before replacing the option.
-- CRNs, option names, visible rows and speed save locally after a short pause in editing and on quit. They restore when you reopen the app.
-- Settings are written atomically; no account, server or GitHub synchronization is used.
-- Normal now requests **200 ms**. Fast retains 1 ms requested pauses; actual timing depends on the computer and browser.
-- Status reports keys sent; it cannot confirm course acceptance.
-
-## Get started
-
-1. Download and extract the ZIP.
-2. Move **CRN Typer.app** from the `package` folder to **Applications** and open it.
-3. Fill an option with up to six CRNs and choose **Normal** or **Fast**.
-4. Click the first empty CRN box on the registration page, then press **F1–F4** for that option. Some Mac keyboards need **Fn/Globe + F1–F4**.
-5. Review the result in **Summary**.
-
-Start with **one empty CRN field**. The app finishes at **Add to Summary**; it does not press the separate registration **Submit** button.
-
-## Pick your pace
-
-| Mode | Behavior |
-| --- | --- |
-| **Normal** | Waits 200 ms for Banner to create and focus the next CRN field. |
-| **Fast** | Activates Add Another CRN itself, with 1 ms requested pauses. Actual speed depends on macOS and the browser. |
-
-Fast mode can outrun a busy browser. Try the app on a practice form first. There is a small Easter egg when you select Fast.
+Six CRNs per option. Normal requests **200 ms**; Fast requests 1 ms. Click the first browser CRN field, then F1–F4 (Fn/Globe may be needed). Both end at Add to Summary using Tab Tab Enter. Submit remains manual. Escape cancels; changing apps stops a run. Browser tab changes are not detected. Test on a practice form; live behavior remains unverified.
 
 ## First-time Mac setup
 
@@ -58,21 +31,5 @@ CRN Typer is locally signed but is not Apple Developer ID signed or notarized. m
 
 Accessibility access lets the app send the keyboard input to your browser.
 
-## Stay in control
 
-- **Escape** cancels an active run.
-- Switching applications stops the run. Keep the same browser tab and field focused; changes inside one browser are not detected.
-- Clear partially entered text before trying again. The app does not undo typing.
-- CRNs stay in memory until the app closes. No network calls, credentials, analytics, or saved CRN lists.
-
-This is an unofficial utility. It cannot inspect the active field or confirm whether a class was accepted.
-
-## For developers
-
-The source is in [`src/`](src). See [Building the app](docs/BUILDING.md) for local and GitHub build instructions. Builds check both CPU architectures, the typing sequence, and the local app signature. Interactive registration behavior still needs a Mac test.
-
-**Using Windows?** [Get CRN Typer for Windows](https://github.com/mechboi09/crn-typer-windows).
-
-## Local storage
-
-Settings: `~/Library/Application Support/CRNTyper-AUB/settings.json`. Clearing or moving this file resets your settings. Keep the file if you reinstall or replace the executable. Files are local and unencrypted.
+[Windows version](https://github.com/mechboi09/crn-typer-windows)

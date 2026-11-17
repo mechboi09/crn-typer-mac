@@ -1,6 +1,6 @@
 # CRN typer for Mac
 
-**Updated app build in progress.** The previous download did not include the final seven-box editor. This page will link the new app after its universal build and signature checks pass.
+**Mac update not yet available:** GitHub could not assign a Mac runner to build the latest source. The new download will be linked once the app is built.
 
 The finished download contains only **CRN typer.app** in a ZIP; all instructions are here. macOS apps are bundles, so a ZIP is needed to distribute the app correctly. An EXE is Windows-only.
 
@@ -18,7 +18,7 @@ The finished download contains only **CRN typer.app** in a ZIP; all instructions
 - **Command+A** (or **Control+A**) once selects the current CRN; twice within 0.7 seconds selects that column's numbers.
 - Copy/Cut/Paste and Delete/Backspace apply to the selected column. Clearing returns to its first box.
 - No autosave or settings files. Closing the app discards the CRNs.
-- The black **Normal/Fast toggle** starts in Fast. Normal requests **200 ms** between entries; Fast requests **1 ms** and activates Add Another CRN using Tab + Enter. Actual timing varies. **Tips** opens the notes.
+- The black **Normal/Fast toggle** starts in Fast. Normal uses **200 ms** between entries; Fast uses **1 ms** and activates Add Another CRN using Tab + Enter. Actual timing varies. **Tips** opens the notes.
 
 ## First-time Mac setup
 
@@ -29,7 +29,7 @@ The app is locally signed, but is not Apple Developer ID signed or notarized. ma
 3. Confirm Open and enter your Mac login password on the Mac if prompted. [Apple's instructions](https://support.apple.com/en-us/102445)
 4. In **Privacy & Security → Accessibility**, enable **CRN typer**. Add it using **+** if needed, then quit and reopen the app. On macOS 12 use System Preferences → Security & Privacy → Privacy → Accessibility.
 
-Close older typer apps before running this one. Escape cancels; switching applications stops a run. Changes of browser tab or field are not detected. The app cannot verify page results. Test on a practice form first; interactive iPad/Mac or live registration behavior has not been verified by the build checks.
+Close older typer apps before running this one. Escape cancels; switching applications stops a run. Changes of browser tab or field are not detected. The app cannot verify page results. 
 
 ## Building
 

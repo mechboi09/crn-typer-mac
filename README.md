@@ -1,6 +1,8 @@
 # CRN Typer - AUB
 
-**Updated Mac download pending.** The ZIP will be available after a successful [Mac build](https://github.com/mechboi09/crn-typer-mac/actions/workflows/build-mac.yml). The updated app supports Apple Silicon and Intel Macs running macOS 12 or later.
+**[Download CRN Typer - AUB.zip](https://github.com/mechboi09/crn-typer-mac/raw/refs/heads/main/downloads/CRN%20Typer%20-%20AUB.zip)**
+
+The ZIP contains only the app. It supports Apple Silicon and Intel Macs running macOS 12 or later.
 
 ## How to use
 

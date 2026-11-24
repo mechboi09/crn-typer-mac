@@ -7,10 +7,9 @@ The ZIP contains only the app. It supports Apple Silicon and Intel Macs running 
 ## How to use
 
 1. Extract **CRN Typer - AUB.zip**, move **CRN Typer - AUB.app** to Applications, then open it.
-2. Enter up to **seven CRNs** in each of the four options. Boxes accept digits and keep leading zeros.
-3. On an offline AUB practice form, click the first empty CRN box.
-4. Press **F1–F4** for the matching option. Some keyboards need **Fn/Globe + F1–F4**.
-5. Review Summary, then press **Submit** yourself.
+2. Enter up to **seven CRNs** in each of the four options.
+3. Press **F1–F4** for the matching option. Some keyboards need **Fn/Globe + F1–F4**.
+4. Review Summary, then press **Submit** yourself.
 
 ## First-time setup
 
@@ -41,6 +40,8 @@ Only open a downloaded app you trust. [Apple's instructions](https://support.app
 
 The timing values are programmed pauses; the browser and macOS can affect actual speed. The app finishes at **Add to Summary**.
 
-Close older typer apps before using the shortcuts. **Escape** cancels; switching applications also stops a run. Keep the correct browser tab and field focused, and review the result in Summary.
+**Escape** cancels; switching applications also stops a run. Keep the correct browser tab and field focused, and review the result in Summary.
 
 [Windows version](https://github.com/mechboi09/crn-typer-windows) · [Developer notes](docs/BUILDING.md)
+
+**Make sure you only have one CRN Typer open.**

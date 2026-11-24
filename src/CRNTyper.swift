@@ -94,7 +94,7 @@ let hotkeySignature: OSType = 0x43524E54 // CRNT
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSTextFieldDelegate {
     var window: NSWindow!
     var fields: [[NSTextField]] = []
-    var status = NSTextField(wrappingLabelWithString: "Ready. Focus the first empty CRN box, then press F1–F4.\nEscape cancels. Choose Normal or Fast.")
+    var status = NSTextField(wrappingLabelWithString: "Ready. Focus the first CRN box, then F1–F4. Escape cancels.")
     var hotkeys: [EventHotKeyRef] = []
     var escapeKey: EventHotKeyRef?
     var eventHandler: EventHandlerRef?

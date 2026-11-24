@@ -1,12 +1,12 @@
 # CRN Typer - AUB
 
-**New Mac download pending:** GitHub could not assign a Mac runner to build the latest version.
+**Updated Mac download pending.** The ZIP will be available after a successful [Mac build](https://github.com/mechboi09/crn-typer-mac/actions/workflows/build-mac.yml). The updated app supports Apple Silicon and Intel Macs running macOS 12 or later.
 
 ## How to use
 
 1. Extract **CRN Typer - AUB.zip**, move **CRN Typer - AUB.app** to Applications, then open it.
-2. Enter up to **seven CRNs** in each option.
-3. Click the first empty CRN box in your browser.
+2. Enter up to **seven CRNs** in each of the four options. Boxes accept digits and keep leading zeros.
+3. On an offline AUB practice form, click the first empty CRN box.
 4. Press **F1–F4** for the matching option. Some keyboards need **Fn/Globe + F1–F4**.
 5. Review Summary, then press **Submit** yourself.
 
@@ -31,11 +31,13 @@ Only open a downloaded app you trust. [Apple's instructions](https://support.app
 
 ## Modes
 
-**Fast is the default.** Use the switch to change modes, or open **Tips** for the notes.
+**Fast is the default.** The compact black **Normal / Fast** switch sits below the options. The inactive label is gray and the white knob has a thin outline. Open **Tips** on the right for the mode notes.
 
 | Normal | Fast |
 | --- | --- |
 | 200 ms | 1 ms |
+
+The timing values are programmed pauses; the browser and macOS can affect actual speed. The app finishes at **Add to Summary**.
 
 Close older typer apps before using the shortcuts. **Escape** cancels; switching applications also stops a run. Keep the correct browser tab and field focused, and review the result in Summary.
 

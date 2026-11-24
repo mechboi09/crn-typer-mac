@@ -6,7 +6,6 @@ on:
     paths:
       - 'src/**'
       - 'build-mac.sh'
-      - 'MAC-README.txt'
       - 'docs/**'
       - '.github/workflows/build-mac.yml'
 
